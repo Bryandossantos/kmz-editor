@@ -1,0 +1,51 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Install front‑end deps & build
+      run: |
+        cd frontend
+        npm ci
+        npm run build
+        cd ..
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install Python deps
+      run: |
+        pip install -r backend/requirements.txt
+        pip install pyinstaller
+
+    - name: Copy static SPA to backend/static
+      run: |
+        if exist backend\\static rmdir /S /Q backend\\static
+        xcopy /E /I /Y frontend\\dist backend\\static
+
+    - name: Build EXE (one‑file)
+      run: |
+        pyinstaller kms.spec
+
+    - name: Upload KMZEditor.exe
+      uses: actions/upload-artifact@v4
+      with:
+        name: KMZEditor
+        path: dist/KMZEditor/KMZEditor.exe
