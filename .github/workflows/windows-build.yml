@@ -19,11 +19,12 @@ jobs:
         node-version: 20
 
     - name: Install front‑end deps & build
-      run: |
-        cd frontend
-        npm ci
-        npm run build
-        cd ..
+  run: |
+    cd frontend
+    npm install                 # instala sem precisar do package‑lock.json
+    npm run build               # dispara o script "vite build"
+    cd ..
+
 
     - name: Setup Python
       uses: actions/setup-python@v5
